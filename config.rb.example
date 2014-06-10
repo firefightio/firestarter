@@ -1,0 +1,26 @@
+# Configuration file for codewars vagrant
+# Rename this file config.rb in the same directory as Vagrantfile
+
+###############################################################
+# VM Properties
+###############################################################
+
+## How much memory should each VM be allocated
+#$vb_mem = 512
+
+## How many CPUs each VM should have access to
+#$vb_cpus = 1
+
+###############################################################
+# Clustering
+###############################################################
+
+## How many additional agent VM's you wish to create
+#$num_servers = 1
+
+###############################################################
+# CoreOS Config
+###############################################################
+
+## Which release line should CoreOS get it's updates from
+#$update_channel = "alpha"
