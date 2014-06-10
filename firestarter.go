@@ -1,10 +1,19 @@
+// Notes:
+//
+// - Currently run will fail if the image has not already been pulled. This is
+//   desired behavior. There will eventually be an option to supply sources 
+//   which can be pulled from.
+//
+
 package main
 
 import (
   "github.com/fsouza/go-dockerclient"
+  "github.com/streadway/amqp"
   "log"
   "bytes"
   "strings"
+  "os"
 )
 
 func logfail(err error) {
@@ -52,10 +61,20 @@ func run(client *docker.Client, options docker.CreateContainerOptions, host_conf
   logfail(err)
 }
 
-func main() {
-  // Attach to local docker instance
-  endpoint := "unix:///docker.sock"
+func addDockerClient(endpoint string) *docker.Client {
   client, err := docker.NewClient(endpoint)
+  logfail(err)
+  return client
+}
+
+func main() {
+  // Create a client for the local docker instance
+  endpoint := "unix:///docker.sock"
+  client := addDockerClient(endpoint)
+
+  // Attach to RabbitMQ
+  connection, err := amqp.Dial("amqp://" + os.Getenv("RABBITMQ_USER") + 
+                     ":" + os.Getenv("RABBITMQ_PASS") + "@rabbitmq:5672")
   logfail(err)
 
   // Define command in string array format
@@ -64,7 +83,7 @@ func main() {
 
   // Define container
   container_config := docker.Config{
-    Image: "dockerfile/ubuntu",
+    Image: "fedora",
     Cmd:   cmd_array,
   }
 
@@ -75,5 +94,9 @@ func main() {
   // Define the container config
   host_config := docker.HostConfig{}
 
+  // Run the container
   run(client, options, host_config)
+
+  // Close the RabbitMQ connection before exiting
+  defer connection.Close()
 }
