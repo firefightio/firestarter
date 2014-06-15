@@ -5,6 +5,13 @@
 //   which can be pulled from.
 //
 
+// ToDo:
+// Take requests
+// Send results back
+// Pull configurations from etcd: "github.com/coreos/go-etcd"
+// Multi-container configurations
+
+
 package main
 
 import (
@@ -72,11 +79,6 @@ func main() {
   endpoint := "unix:///docker.sock"
   client := addDockerClient(endpoint)
 
-  // Attach to RabbitMQ
-  connection, err := amqp.Dial("amqp://" + os.Getenv("RABBITMQ_USER") + 
-                     ":" + os.Getenv("RABBITMQ_PASS") + "@rabbitmq:5672")
-  logfail(err)
-
   // Define command in string array format
   cmd := "echo\n'Hello World'"
   cmd_array := strings.Split(cmd, "\n")
@@ -96,7 +98,4 @@ func main() {
 
   // Run the container
   run(client, options, host_config)
-
-  // Close the RabbitMQ connection before exiting
-  defer connection.Close()
 }
